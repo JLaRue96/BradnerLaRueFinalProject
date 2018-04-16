@@ -1,6 +1,9 @@
 """ Functionalities for generating decks and passing out cards """
 
 import random
+from constants import PLAYER_ONE_WIN
+from constants import PLAYER_TWO_WIN
+from constants import PLAYERS_TIE
 
 # global dictionary that evaluates card values.
 card_values_dict = {
@@ -81,11 +84,11 @@ def compare_cards(p1_card, p2_card):
     p2_value = card_values_dict.get(p2_card[0])
 
     if p1_value > p2_value:
-        return 1
+        return PLAYER_ONE_WIN
     elif p2_value > p1_value:
-        return 2
+        return PLAYER_TWO_WIN
     else:
-        return 3
+        return PLAYERS_TIE
 
 
 def main():
