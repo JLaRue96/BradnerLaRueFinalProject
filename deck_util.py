@@ -5,6 +5,7 @@ from constants import PLAYER_ONE_WIN
 from constants import PLAYER_TWO_WIN
 from constants import PLAYERS_TIE
 
+
 # global dictionary that evaluates card values.
 card_values_dict = {
     'Two': 2,
