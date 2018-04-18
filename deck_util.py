@@ -1,4 +1,13 @@
-""" Functionalities for generating decks and passing out cards """
+""" Functionalities for generating decks and passing out cards
+
+    Decks are lists in the following format:
+    Top of Deck --> [Card 1, Card 2, ... , Card n] <-- Bottom of Deck
+
+    Cards are tuples in the following format:
+    (value, suit)
+    where both value and suit are strings.
+
+ """
 
 import random
 from constants import PLAYER_ONE_WIN
@@ -70,6 +79,36 @@ def shuffle_deck(deck):
     return shuffled_deck
 
 
+def add_cards_to_deck(card_list, deck):
+    """
+    Adds a list of cards to a card deck.
+    :param card_list: List of cards to be added.
+    :param deck: Deck that receives cards.
+    :return: Updated deck with cards.
+    """
+
+    for card in card_list:
+        deck.append(card)
+
+    return deck
+
+
+def remove_card_from_top(deck):
+    """
+    Removes and returns the top card of the deck
+    :param deck: Deck that contains a variable number of cards.
+    :return: The first card of the deck.
+    """
+
+    try:
+        card = deck[0]
+        del deck[0]
+        return card
+
+    except IndexError:
+        print('The deck is empty!')
+
+
 def compare_cards(p1_card, p2_card):
     """
     Compares cards from either player. Returns the comparison value.
@@ -92,6 +131,39 @@ def compare_cards(p1_card, p2_card):
         return PLAYERS_TIE
 
 
+def pass_out_cards(deck):
+    """
+    Passes out cards to the players.
+    :param deck:
+    :return: A tuple of two decks, with the first deck being
+    the set of cards that the first player receives, and
+    the second deck being the set of cards that the second player receives.
+    """
+
+    player_one_deck = []
+    player_two_deck = []
+
+    flag = 1
+
+    while deck:
+
+        if flag:
+
+            player_one_deck.append(deck[0])
+            flag = 0
+
+        else:
+
+            player_two_deck.append(deck[0])
+            flag = 1
+
+        del deck[0]
+
+    tup = (player_one_deck, player_two_deck)
+
+    return tup
+
+
 def main():
     """
     Main method. Primarily used for testing at this stage in development.
@@ -100,24 +172,19 @@ def main():
 
     deck = generate_deck()
 
-    print('ORIGINAL DECK LIST')
+    deck = shuffle_deck(deck)
 
-    for card in deck:
+    passed_out_decks = pass_out_cards(deck)
+
+    print("length of p1 deck = " + str(len(passed_out_decks[0])))
+
+    for card in passed_out_decks[0]:
         print(card[0] + " of " + card[1])
 
-    shuff = shuffle_deck(deck)
+    print("length of p2 deck = " + str(len(passed_out_decks[1])))
 
-    print('SHUFFLED DECK LIST')
-
-    for card in shuff:
+    for card in passed_out_decks[1]:
         print(card[0] + " of " + card[1])
-
-    card_1 = ('Four', 'Diamonds')
-    card_2 = ('King', 'Spades')
-
-    compare_value = compare_cards(card_1, card_2)
-
-    print('Comparison Value: ' + str(compare_value))
 
 
 if __name__ == '__main__':
