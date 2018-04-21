@@ -24,6 +24,13 @@ card_values_dict = {
     'Ace': 11,
 }
 
+# global dictionary for card list interpreter.
+list_interpreter_dict = {
+    'Two': 0, 'Three': 1, 'Four': 2, 'Five': 3, 'Six': 4, 'Seven': 5,
+    'Eight': 6, 'Nine': 7, 'Ten': 8, 'Jack': 9, 'Queen': 10, 'King': 11,
+    'Ace': 12,
+}
+
 # global list containing all possible card suits.
 suits = ['Diamonds', 'Hearts', 'Spades', 'Clubs']
 
@@ -88,6 +95,16 @@ def get_hand_value(hand):
     # TODO: Add functionality to determine which hand the player has.
 
 
+def interpret_list(card_list):
+    card_interpreter_list = [0] * 13
+
+    for card in card_list:
+        index = list_interpreter_dict[card[0]]
+        card_interpreter_list[index] += 1
+
+    return card_interpreter_list
+
+
 def is_royal_flush(card_list):
     """
     Determines if the given list of cards contains a royal flush.
@@ -133,7 +150,10 @@ def main():
 
     print("This should work: " + str(is_royal_flush(rf_card_list)))
 
-    print("This should not work: " + str(is_royal_flush(nrf_card_list)))
+    clist = interpret_list(rf_card_list)
+
+    for position in clist:
+        print(str(position))
 
 
 if __name__ == '__main__':
