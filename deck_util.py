@@ -20,23 +20,6 @@ from constants import PLAYER_TWO_WIN
 from constants import PLAYERS_TIE
 
 
-# global dictionary that evaluates card values.
-card_values_dict = {
-    'Two': 2,
-    'Three': 3,
-    'Four': 4,
-    'Five': 5,
-    'Six': 6,
-    'Seven': 7,
-    'Eight': 8,
-    'Nine': 9,
-    'Ten': 10,
-    'Jack': 10,
-    'Queen': 10,
-    'King': 10,
-    'Ace': 11,
-}
-
 suits = ['Diamonds', 'Hearts', 'Spades', 'Clubs']
 
 card_types = [
@@ -114,14 +97,15 @@ def remove_card_from_top(deck):
         print('The deck is empty!')
 
 
+"""
 def compare_cards(p1_card, p2_card):
-    """
-    Compares cards from either player. Returns the comparison value.
-    :param p1_card: Card from player 1
-    :param p2_card: Card from player 2
-    :return: 1 is returned if player 1 wins the hand. 2 is returned if player 2 wins the hand.
-    3 is returned if the result is a tie.
-    """
+    
+    # Compares cards from either player. Returns the comparison value.
+    # :param p1_card: Card from player 1
+    # :param p2_card: Card from player 2
+    # :return: 1 is returned if player 1 wins the hand. 2 is returned if player 2 wins the hand.
+    # 3 is returned if the result is a tie.
+    
 
     global card_values_dict
 
@@ -134,6 +118,7 @@ def compare_cards(p1_card, p2_card):
         return PLAYER_TWO_WIN
     else:
         return PLAYERS_TIE
+"""
 
 
 def pass_out_cards(deck):
@@ -176,6 +161,12 @@ def main():
     """
 
     deck = generate_deck()
+
+    print("length of deck = " +str(len(deck)))
+
+    remove_card_from_top(deck)
+
+    print("length of deck now = " + str(len(deck)))
 
     deck = shuffle_deck(deck)
 
