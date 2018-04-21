@@ -24,6 +24,9 @@ card_values_dict = {
     'Ace': 11,
 }
 
+# global list containing all possible card suits.
+suits = ['Diamonds', 'Hearts', 'Spades', 'Clubs']
+
 # Global variable for the list of cards on the table.
 table_list = []
 
@@ -82,4 +85,56 @@ def get_hand_value(hand):
     for card in table_list:
         card_list.append(card)
 
-    
+    # TODO: Add functionality to determine which hand the player has.
+
+
+def is_royal_flush(card_list):
+    """
+    Determines if the given list of cards contains a royal flush.
+    :param card_list:
+    :return:
+    """
+
+    global suits
+
+    royal_flush = False
+
+    for suit in suits:
+        ten = ('Ten', suit)
+        jack = ('Jack', suit)
+        queen = ('Queen', suit)
+        king = ('King', suit)
+        ace = ('Ace', suit)
+
+        if ten in card_list and jack in card_list and \
+            queen in card_list and king in card_list and \
+                ace in card_list:
+            royal_flush = True
+
+    return royal_flush
+
+
+def main():
+    """
+    Main method. Primarily used for testing at this stage in development.
+    :return:
+    """
+    rf_card_list = [
+        ('Ace', 'Spades'), ('Three', 'Diamonds'), ('King', 'Spades'),
+        ('Four', 'Hearts'), ('Queen', 'Spades'), ('Jack', 'Spades'),
+        ('Ten', 'Spades')
+    ]
+
+    nrf_card_list = [
+        ('Three', 'Diamonds'), ('Three', 'Hearts'), ('Three', 'Spades'),
+        ('Two', 'Hearts'), ('Jack', 'Diamonds'), ('King', 'Spades'),
+        ('Five', 'Clubs')
+    ]
+
+    print("This should work: " + str(is_royal_flush(rf_card_list)))
+
+    print("This should not work: " + str(is_royal_flush(nrf_card_list)))
+
+
+if __name__ == '__main__':
+    main()
