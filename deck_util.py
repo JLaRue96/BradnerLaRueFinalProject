@@ -7,6 +7,11 @@
     (value, suit)
     where both value and suit are strings.
 
+    Hands are in the following format:
+    [Card, Card]
+
+
+
  """
 
 import random
