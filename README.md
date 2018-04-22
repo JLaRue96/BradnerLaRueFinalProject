@@ -1,2 +1,2 @@
 # osproject
-Command-line War Card Game
+Command-line Texas Hold'Em

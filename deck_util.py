@@ -1,27 +1,24 @@
-""" Functionalities for generating decks and passing out cards """
+""" Functionalities for generating decks and passing out cards
+
+    Decks are lists in the following format:
+    Top of Deck --> [Card 1, Card 2, ... , Card n] <-- Bottom of Deck
+
+    Cards are tuples in the following format:
+    (value, suit)
+    where both value and suit are strings.
+
+    Hands are in the following format:
+    [Card, Card]
+
+
+
+ """
 
 import random
 from constants import PLAYER_ONE_WIN
 from constants import PLAYER_TWO_WIN
 from constants import PLAYERS_TIE
 
-
-# global dictionary that evaluates card values.
-card_values_dict = {
-    'Two': 2,
-    'Three': 3,
-    'Four': 4,
-    'Five': 5,
-    'Six': 6,
-    'Seven': 7,
-    'Eight': 8,
-    'Nine': 9,
-    'Ten': 10,
-    'Jack': 10,
-    'Queen': 10,
-    'King': 10,
-    'Ace': 11,
-}
 
 suits = ['Diamonds', 'Hearts', 'Spades', 'Clubs']
 
@@ -70,14 +67,45 @@ def shuffle_deck(deck):
     return shuffled_deck
 
 
+def add_cards_to_deck(card_list, deck):
+    """
+    Adds a list of cards to a card deck.
+    :param card_list: List of cards to be added.
+    :param deck: Deck that receives cards.
+    :return: Updated deck with cards.
+    """
+
+    for card in card_list:
+        deck.append(card)
+
+    return deck
+
+
+def remove_card_from_top(deck):
+    """
+    Removes and returns the top card of the deck
+    :param deck: Deck that contains a variable number of cards.
+    :return: The first card of the deck.
+    """
+
+    try:
+        card = deck[0]
+        del deck[0]
+        return card
+
+    except IndexError:
+        print('The deck is empty!')
+
+
+"""
 def compare_cards(p1_card, p2_card):
-    """
-    Compares cards from either player. Returns the comparison value.
-    :param p1_card: Card from player 1
-    :param p2_card: Card from player 2
-    :return: 1 is returned if player 1 wins the hand. 2 is returned if player 2 wins the hand.
-    3 is returned if the result is a tie.
-    """
+    
+    # Compares cards from either player. Returns the comparison value.
+    # :param p1_card: Card from player 1
+    # :param p2_card: Card from player 2
+    # :return: 1 is returned if player 1 wins the hand. 2 is returned if player 2 wins the hand.
+    # 3 is returned if the result is a tie.
+    
 
     global card_values_dict
 
@@ -90,6 +118,40 @@ def compare_cards(p1_card, p2_card):
         return PLAYER_TWO_WIN
     else:
         return PLAYERS_TIE
+"""
+
+
+def pass_out_cards(deck):
+    """
+    Passes out cards to the players.
+    :param deck:
+    :return: A tuple of two decks, with the first deck being
+    the set of cards that the first player receives, and
+    the second deck being the set of cards that the second player receives.
+    """
+
+    player_one_deck = []
+    player_two_deck = []
+
+    flag = 1
+
+    while deck:
+
+        if flag:
+
+            player_one_deck.append(deck[0])
+            flag = 0
+
+        else:
+
+            player_two_deck.append(deck[0])
+            flag = 1
+
+        del deck[0]
+
+    tup = (player_one_deck, player_two_deck)
+
+    return tup
 
 
 def main():
@@ -100,24 +162,25 @@ def main():
 
     deck = generate_deck()
 
-    print('ORIGINAL DECK LIST')
+    print("length of deck = " +str(len(deck)))
 
-    for card in deck:
+    remove_card_from_top(deck)
+
+    print("length of deck now = " + str(len(deck)))
+
+    deck = shuffle_deck(deck)
+
+    passed_out_decks = pass_out_cards(deck)
+
+    print("length of p1 deck = " + str(len(passed_out_decks[0])))
+
+    for card in passed_out_decks[0]:
         print(card[0] + " of " + card[1])
 
-    shuff = shuffle_deck(deck)
+    print("length of p2 deck = " + str(len(passed_out_decks[1])))
 
-    print('SHUFFLED DECK LIST')
-
-    for card in shuff:
+    for card in passed_out_decks[1]:
         print(card[0] + " of " + card[1])
-
-    card_1 = ('Four', 'Diamonds')
-    card_2 = ('King', 'Spades')
-
-    compare_value = compare_cards(card_1, card_2)
-
-    print('Comparison Value: ' + str(compare_value))
 
 
 if __name__ == '__main__':
