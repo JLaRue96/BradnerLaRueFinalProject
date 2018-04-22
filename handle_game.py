@@ -16,6 +16,8 @@ from constants import hand_value_table
 import random
 
 # Global variable for the list of cards on the table.
+# This will be filled out throughout the round.
+# TODO: Implement reset round that sets this list back to empty, as well as passes out cards
 table_list = []
 
 
@@ -23,6 +25,8 @@ def compare_hands(player_hand_list):
     """
     Determines which player wins the round. May result in a tie.
     Player hand input: (player_id, hand_value, highest_value_card).
+    In the case that the player's hand is a two pair, the input will be the following:
+    (player_id, hand_value, highest_pair_rank, next_pair_rank)
     :param player_hand_list: List of remaining player's hands remaining in the round.
     :return: A list containing the winning player(s).
     It's a list so that, in the case of a tie, the pot can be split amongst the winners.
@@ -48,13 +52,23 @@ def compare_hands(player_hand_list):
 
             if hand_high_card > curr_high_card:
                 highest_valued_hand = hand
+            elif hand_high_card == curr_high_card and hand_value == 'two pair':
+                next_high_card = highest_valued_hand[3]
+                next_hand_high_card = hand[3]
+
+                if next_hand_high_card > next_high_card:
+                    highest_valued_hand = hand
 
     winners = []
 
     for hand in player_hand_list:
 
         if hand[1] == highest_valued_hand[1] and hand[2] == highest_valued_hand[2]:
-            winners.append(hand)
+            if highest_valued_hand[1] == 'two pair':
+                if hand[3] == highest_valued_hand[3]:
+                    winners.append(hand)
+            else:
+                winners.append(hand)
 
     return winners
 
@@ -90,7 +104,10 @@ def get_hand_value(hand):
     # Check if hand is royal flush
     if has_royal_flush(card_list):
         hand_value = ('royal flush', 'Ace')
-    # TODO: STRAIGHT FLUSH
+    # Check if hand is straight flush
+    elif has_straight_flush(card_list):
+        straight_flush_rank = get_straight_flush_rank(card_list)
+        hand_value = ('straight flush', straight_flush_rank)
     # Check if hand is four of a kind
     elif has_n_of_same_rank(count_array, 4):
         four_of_kind_rank = get_rank_of_hand(count_array, 4)
@@ -99,7 +116,10 @@ def get_hand_value(hand):
     elif has_n_of_same_rank(count_array, 3) and has_n_of_same_rank(count_array, 2):
         full_house_rank = get_rank_of_hand(count_array, 3)
         hand_value = ('full house', full_house_rank)
-    # TODO: FLUSH
+    # Check if hand is flush
+    elif has_flush(card_list):
+        flush_rank = get_flush_rank(card_list)
+        hand_value = ('flush', flush_rank)
     # Check if hand is straight
     elif has_straight(count_array):
         straight_rank = get_straight_rank(count_array)
@@ -160,7 +180,7 @@ def get_high_card(card_list):
     return high_card[0]
 
 
-def test_func():
+def test_hand_func():
     """
     Simple test function that will generate a random table_list and hand.
     Will determine value of the combination of these two lists.
@@ -196,6 +216,220 @@ def test_func():
         print("Hand value: " + hand_value[0] + " of rank " + hand_value[1])
 
     print("\n\n")
+
+
+def test_winner_func():
+    test_deck = generate_deck()
+
+    ctr = 0
+    num = 0
+
+    hand_list = []
+
+    # Generates the table list.
+    while ctr < 5:
+        index = random.randint(0, len(test_deck) - 1)
+        table_list.append(test_deck[index])
+        del test_deck[index]
+        ctr += 1
+
+    # Generates the hands of 5 Players.
+    while num < 5:
+
+        cards = []
+
+        # Adds two cards to hand
+        index = random.randint(0, len(test_deck) - 1)
+        cards.append(test_deck[index])
+        del test_deck[index]
+
+        index = random.randint(0, len(test_deck) - 1)
+        cards.append(test_deck[index])
+        del test_deck[index]
+
+        hand = (num, cards[0], cards[1])
+
+        hand_list.append(hand)
+
+        num += 1
+
+    print("\n CARDS ON TABLE \n")
+
+    for card in table_list:
+        print(card[0] + " of " + card[1])
+
+    print("\n")
+
+    prepped_list = []
+
+    for hand in hand_list:
+        card_one = hand[1]
+        card_two = hand[2]
+        print("Hand of player " + str(hand[0]) + ": ")
+        print(card_one[0] + " of " + card_one[1] + " and ")
+        print(card_two[0] + " of " + card_two[1] + "\n")
+        hand_list = [hand[1], hand[2]]
+        hand_value = get_hand_value(hand_list)
+
+        if hand_value[0] == 'two pair':
+            prepped_tup = (hand[0], hand_value[0], hand_value[1], hand_value[2])
+        else:
+            prepped_tup = (hand[0], hand_value[0], hand_value[1])
+
+        prepped_list.append(prepped_tup)
+
+    winners = compare_hands(prepped_list)
+    winning_player = winners[0]
+
+    print("Winner is player " + str(winning_player[0]) + " with a " + winning_player[1] +
+          " of rank " + winning_player[2] + "! ")
+
+
+def get_straight_flush_rank(card_array):
+    straight_flush_rank = ''
+
+    count_array = generate_count_list(card_array)
+
+    indices = get_straight_list_indices(count_array)
+
+    first_index = indices[0]
+    last_index = indices[1]
+
+    while last_index - first_index >= 4:
+
+        for suit in suits:
+            card_one = (get_val_from_index[first_index], suit)
+            card_two = (get_val_from_index[first_index + 1], suit)
+            card_three = (get_val_from_index[first_index + 2], suit)
+            card_four = (get_val_from_index[first_index + 3], suit)
+            card_five = (get_val_from_index[first_index + 4], suit)
+
+            if card_one in card_array and card_two in card_array and \
+                    card_three in card_array and card_four in card_array and \
+                    card_five in card_array:
+                straight_flush_rank = card_five[0]
+
+        first_index += 1
+
+    return straight_flush_rank
+
+
+def has_straight_flush(card_array):
+    straight_flush = False
+
+    if len(card_array) != 7:
+        return straight_flush
+
+    count_array = generate_count_list(card_array)
+
+    indices = get_straight_list_indices(count_array)
+
+    first_index = indices[0]
+    last_index = first_index + 4
+
+    while last_index <= indices[1]:
+        for suit in suits:
+            card_val_one = get_val_from_index[first_index]
+            card_one = (card_val_one, suit)
+
+            card_val_two = get_val_from_index[first_index + 1]
+            card_two = (card_val_two, suit)
+
+            card_val_three = get_val_from_index[first_index + 2]
+            card_three = (card_val_three, suit)
+
+            card_val_four = get_val_from_index[first_index + 3]
+            card_four = (card_val_four, suit)
+
+            card_val_five = get_val_from_index[first_index + 4]
+            card_five = (card_val_five, suit)
+
+            if card_one in card_array and card_two in card_array \
+                    and card_three in card_array and card_four in card_array \
+                    and card_five in card_array:
+                straight_flush = True
+
+        first_index += 1
+        last_index += 1
+
+    return straight_flush
+
+
+def has_flush(card_array):
+    flush = False
+    diamond_ctr = 0
+    spade_ctr = 0
+    club_ctr = 0
+    heart_ctr = 0
+
+    if len(card_array) != 7:
+        return flush
+
+    for card in card_array:
+        suit = card[1]
+
+        if suit == 'Diamonds':
+            diamond_ctr += 1
+        elif suit == 'Spades':
+            spade_ctr += 1
+        elif suit == 'Clubs':
+            club_ctr += 1
+        else:
+            heart_ctr += 1
+
+    if diamond_ctr >= 5 or spade_ctr >= 5 or \
+            club_ctr >= 5 or heart_ctr >= 5:
+        flush = True
+
+    return flush
+
+
+def find_flush_suit(card_array):
+    diamond_ctr = 0
+    spade_ctr = 0
+    club_ctr = 0
+    heart_ctr = 0
+
+    for card in card_array:
+        suit = card[1]
+
+        if suit == 'Diamonds':
+            diamond_ctr += 1
+        elif suit == 'Spades':
+            spade_ctr += 1
+        elif suit == 'Clubs':
+            club_ctr += 1
+        else:
+            heart_ctr += 1
+
+    if diamond_ctr == 5:
+        suit = 'Diamonds'
+    elif spade_ctr == 5:
+        suit = 'Spades'
+    elif club_ctr == 5:
+        suit = 'Clubs'
+    else:
+        suit = 'Hearts'
+
+    return suit
+
+
+def get_flush_rank(card_array):
+    suit = find_flush_suit(card_array)
+
+    flush_list = []
+
+    for card in card_array:
+        if card[1] == suit:
+            flush_list.append(card[0])
+
+    max_rank = flush_list[0]
+
+    for val in flush_list:
+        if card_values_dict[val] > card_values_dict[max_rank]:
+            max_rank = val
+
+    return max_rank
 
 
 def has_straight(count_array):
@@ -378,29 +612,30 @@ def main():
 
     """
     rf_card_list = [
-        ('Ace', 'Spades'), ('Three', 'Diamonds'), ('King', 'Spades'),
-        ('Four', 'Hearts'), ('Queen', 'Spades'), ('Jack', 'Spades'),
+        ('Three', 'Diamonds'), ('King', 'Spades'),
+        ('Four', 'Hearts'), ('Queen', 'Spades'), ('Ace', 'Spades'),
+        ('Jack', 'Spades'),
         ('Ten', 'Spades')
     ]
-
     nrf_card_list = [
         ('Three', 'Diamonds'), ('Three', 'Hearts'), ('Three', 'Spades'),
         ('Two', 'Hearts'), ('Jack', 'Diamonds'), ('King', 'Spades'),
         ('Five', 'Clubs')
     ]
 
-    print("High card val = " + get_high_card(rf_card_list))
+    pass_card_list = [
 
-    print("This should work: " + str(has_royal_flush(rf_card_list)))
+        ('Four', 'Hearts'), ('Seven', 'Spades'), ('Five', 'Spades'),
+        ('Ten', 'Diamonds'), ('Six', 'Spades'), ('Four', 'Spades'),
+        ('Eight', 'Spades'),
+
+    ]
+
+    print("This should work: " + str(get_straight_flush_rank(pass_card_list)))
     """
 
-    """
-    straight_list = [0,1,2,1,1,1,2,1,1,2,2,2,0]
-
-    test = get_two_pair(straight_list)
-    """
-
-    test_func()
+    # test_hand_func()
+    test_winner_func()
 
 
 if __name__ == '__main__':
