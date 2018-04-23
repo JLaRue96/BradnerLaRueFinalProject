@@ -18,9 +18,7 @@ import random
 from constants import PLAYER_ONE_WIN
 from constants import PLAYER_TWO_WIN
 from constants import PLAYERS_TIE
-
-
-suits = ['Diamonds', 'Hearts', 'Spades', 'Clubs']
+from constants import suits
 
 card_types = [
     'Two', 'Three', 'Four', 'Five',
@@ -35,7 +33,6 @@ def generate_deck():
     :return: a 52-card deck, where each card is in form (str, str)
     """
 
-    global suits
     global card_types
 
     deck = []
