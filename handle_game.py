@@ -219,6 +219,10 @@ def test_hand_func():
 
 
 def test_winner_func():
+    """
+    Simple test function. Will be removed upon final submission.
+    :return:
+    """
     test_deck = generate_deck()
 
     ctr = 0
@@ -286,6 +290,11 @@ def test_winner_func():
 
 
 def get_straight_flush_rank(card_array):
+    """
+    Gets the maximum rank of the straight flush
+    :param card_array: List of cards
+    :return: rank of the highest valued card in straight flush, in string form.
+    """
     straight_flush_rank = ''
 
     count_array = generate_count_list(card_array)
@@ -315,6 +324,11 @@ def get_straight_flush_rank(card_array):
 
 
 def has_straight_flush(card_array):
+    """
+    Determines whether or not there is a straight flush in the card list.
+    :param card_array: Card list
+    :return: True if a straight flush exists, false if otherwise.
+    """
     straight_flush = False
 
     if len(card_array) != 7:
@@ -356,6 +370,11 @@ def has_straight_flush(card_array):
 
 
 def has_flush(card_array):
+    """
+    Determines whether or not card list contains a flush
+    :param card_array: Card list
+    :return: True if flush exists in card list, False if otherwise.
+    """
     flush = False
     diamond_ctr = 0
     spade_ctr = 0
@@ -385,6 +404,13 @@ def has_flush(card_array):
 
 
 def find_flush_suit(card_array):
+    """
+    Determines the suit of the flush
+    (as mentioned before, a flush is where at least 5
+     of the 7 cards in a card list share the same suit.)
+    :param card_array: Card list
+    :return: The suit of the card in String form
+    """
     diamond_ctr = 0
     spade_ctr = 0
     club_ctr = 0
@@ -415,6 +441,11 @@ def find_flush_suit(card_array):
 
 
 def get_flush_rank(card_array):
+    """
+    Gets the maximum card value from a flush.
+    :param card_array: A list of cards
+    :return: The highest card value in the flush, in String form.
+    """
     suit = find_flush_suit(card_array)
 
     flush_list = []
@@ -433,6 +464,11 @@ def get_flush_rank(card_array):
 
 
 def has_straight(count_array):
+    """
+    Determines if a count array (derived from card list) has a straight.
+    :param count_array: A count array, derived from a card list.
+    :return: True if count array has a straight. False if otherwise.
+    """
     straight = False
     count = 0
 
@@ -452,6 +488,14 @@ def has_straight(count_array):
 
 
 def get_straight_list_indices(count_array):
+    """
+    Gets the starting and stopping indices of a straight.
+    The starting index = lowest card value in straight.
+    Ending index = highest card value in straight.
+    :param count_array: A count array from a card list.
+    :return: A tuple where the first element is the starting index,
+     and the last element is the ending index.
+    """
     straight_count = 0
     start_of_straight_list = -1
     end_of_straight_list = -1
@@ -489,6 +533,11 @@ def get_straight_list_indices(count_array):
 
 
 def get_straight_rank(count_array):
+    """
+    Gets the maximum card value in a straight.
+    :param count_array: A count array.
+    :return: The maximum card value in a straight in String form.
+    """
     straight_indices = get_straight_list_indices(count_array)
 
     end_index = straight_indices[1]
@@ -499,6 +548,12 @@ def get_straight_rank(count_array):
 
 
 def get_two_pair(count_array):
+    """
+    Retrieves ranks of each pair in count array.
+    :param count_array: The count array that contains two pair.
+    :return: tuple with the rank of each pair as its elements.
+    Note: The pair with the most significant rank is the first element.
+    """
     pair_indices = []
 
     for counter, value in enumerate(count_array):
@@ -520,6 +575,12 @@ def get_two_pair(count_array):
 
 
 def has_two_pair(count_array):
+    """
+    Determines if the given count array has a two pair.
+    :param count_array: count array (different from a card list,
+     see design doc for details).
+    :return: True if two pair exists. False if otherwise.
+    """
     count = 0
     two_pair = False
 
@@ -610,31 +671,6 @@ def main():
     :return:
     """
 
-    """
-    rf_card_list = [
-        ('Three', 'Diamonds'), ('King', 'Spades'),
-        ('Four', 'Hearts'), ('Queen', 'Spades'), ('Ace', 'Spades'),
-        ('Jack', 'Spades'),
-        ('Ten', 'Spades')
-    ]
-    nrf_card_list = [
-        ('Three', 'Diamonds'), ('Three', 'Hearts'), ('Three', 'Spades'),
-        ('Two', 'Hearts'), ('Jack', 'Diamonds'), ('King', 'Spades'),
-        ('Five', 'Clubs')
-    ]
-
-    pass_card_list = [
-
-        ('Four', 'Hearts'), ('Seven', 'Spades'), ('Five', 'Spades'),
-        ('Ten', 'Diamonds'), ('Six', 'Spades'), ('Four', 'Spades'),
-        ('Eight', 'Spades'),
-
-    ]
-
-    print("This should work: " + str(get_straight_flush_rank(pass_card_list)))
-    """
-
-    # test_hand_func()
     test_winner_func()
 
 

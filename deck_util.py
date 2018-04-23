@@ -18,9 +18,7 @@ import random
 from constants import PLAYER_ONE_WIN
 from constants import PLAYER_TWO_WIN
 from constants import PLAYERS_TIE
-
-
-suits = ['Diamonds', 'Hearts', 'Spades', 'Clubs']
+from constants import suits
 
 card_types = [
     'Two', 'Three', 'Four', 'Five',
@@ -35,7 +33,6 @@ def generate_deck():
     :return: a 52-card deck, where each card is in form (str, str)
     """
 
-    global suits
     global card_types
 
     deck = []
@@ -97,30 +94,6 @@ def remove_card_from_top(deck):
         print('The deck is empty!')
 
 
-"""
-def compare_cards(p1_card, p2_card):
-    
-    # Compares cards from either player. Returns the comparison value.
-    # :param p1_card: Card from player 1
-    # :param p2_card: Card from player 2
-    # :return: 1 is returned if player 1 wins the hand. 2 is returned if player 2 wins the hand.
-    # 3 is returned if the result is a tie.
-    
-
-    global card_values_dict
-
-    p1_value = card_values_dict.get(p1_card[0])
-    p2_value = card_values_dict.get(p2_card[0])
-
-    if p1_value > p2_value:
-        return PLAYER_ONE_WIN
-    elif p2_value > p1_value:
-        return PLAYER_TWO_WIN
-    else:
-        return PLAYERS_TIE
-"""
-
-
 def pass_out_cards(deck):
     """
     Passes out cards to the players.
@@ -129,6 +102,8 @@ def pass_out_cards(deck):
     the set of cards that the first player receives, and
     the second deck being the set of cards that the second player receives.
     """
+
+    # TODO: REFACTOR TO PASS OUT CARDS LIKE A HOLD'EM GAME, NOT FOR A GAME OF 'WAR'
 
     player_one_deck = []
     player_two_deck = []
