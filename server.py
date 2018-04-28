@@ -1,8 +1,7 @@
 import socket
-
-import socket
 import json
 import sys
+import time
 
 class HoldEmServer:
 
@@ -10,6 +9,9 @@ class HoldEmServer:
         self.client_list = []
         self.HOST = ''
         self.PORT = 8888
+        self.num_players = 2
+        self.connections = {}
+        self.addresses = {}
 
         try:
             self.serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -25,9 +27,11 @@ class HoldEmServer:
 
     def acceptClients(self):
         #listen for 2 players
-        self.serversocket.listen(2)
-
-        print("socket listening")
+        self.serversocket.listen(self.num_players)
+        print("socket listening for " + str(self.num_players) + " players to connect")
+        for i in range(2):
+            conn, addr = self.serversocket.accept()
+            print("connection " + str(i + 1) + " of " + str(self.num_players) + " established.")
 
     def collectCommand(stateMsg, options, self):
         data = {"message" : stateMsg, "options" : options}
@@ -38,3 +42,7 @@ class HoldEmServer:
 
     def pack_dict(dict, self):
         data = json.dumps(dict)
+
+myServer = HoldEmServer()
+myServer.acceptClients()
+time.sleep(5)

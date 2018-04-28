@@ -1,29 +1,11 @@
 import socket
-
 import json
+import sys
+import time
 
-print("\nFill out the following fields:")
-HOST = input("\nNet Send Server Public IP: ")
-PORT = int(input("\nNet Send Server Port: "))
+clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-try:
-    s = socket(AF_INET,SOCK_STREAM)
-    s.connect((HOST,PORT))
-    print("Connected to server:",HOST,)
-except IOError:
-    print("\nUndefined Connection Error Encountered")
-    input("Press Enter to exit, then restart the script")
-    sys.exit()
+remote_ip = "127.0.0.1"
+port = 8888
 
-#dictionary that maps phases to command options
-commands = {"pre-flop" : ["check", "bet", "fold"], "round-1" : ["check", "bet", "fold"]}
-
-def send_cmd(command):
-    #serialize command (useful for once they get more complex)
-    try:
-        data_string = json.dumps(command)
-        s.send(data_string)
-        reply = s.recv(1024)
-    except IOError:
-        print("\nIO Error detected, exiting")
-
+clientSocket.connect((remote_ip , port))
