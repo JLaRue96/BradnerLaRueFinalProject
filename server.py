@@ -25,6 +25,12 @@ def unpack_cmd(data):
 
 
 def play_round():
+    """
+    Plays a round of Hold'em.
+    Assumes that all players will remain in the game
+    for the duration of the round.
+    :return:
+    """
 
     global table_card_list
 
@@ -73,6 +79,36 @@ def play_round():
     # TODO: Send Clients list of cards. Should be printed to terminal.
     # TODO: Each Client bets. Clients can also fold if need be.
 
-    # Determine the winner(s).
+    player_info_tuple_list = []
 
-    pass
+    # Get Player info tuples.
+    # Tuple format: (Player ID, Player's hand value, highest rank of Player's hand value)
+    for player in player_list:
+
+        if player.has_not_folded():
+
+            hand_value = get_hand_value(player.get_hand(), table_card_list)
+
+            if hand_value[0] == 'Two pair':
+                player_tup = (player.get_id(), hand_value[0], hand_value[1], hand_value[2])
+            else:
+                player_tup = (player.get_id(), hand_value[0], hand_value[1])
+
+            player_info_tuple_list.append(player_tup)
+
+    # Get a list of winners from the player info tuples:
+    winners = compare_hands(player_info_tuple_list)
+
+    # TODO: Send to clients the list of winners.
+
+    reset_player_statuses()
+
+
+def reset_player_statuses():
+    """
+    Updates the player statuses so that
+    each player is in play mode.
+    :return: None
+    """
+    for player in player_list:
+        player.reset_is_playing_status()
