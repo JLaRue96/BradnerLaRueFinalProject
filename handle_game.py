@@ -6,7 +6,6 @@ from deck_util import generate_deck
 from deck_util import shuffle_deck
 from deck_util import remove_card_from_top
 from deck_util import add_cards_to_deck
-from player import Player
 from constants import NUM_POSSIBLE_VALUES
 from constants import card_values_dict
 from constants import get_val_from_index
@@ -17,8 +16,6 @@ import random
 
 # Global variable for the list of cards on the table.
 # This will be filled out throughout the round.
-# TODO: Implement reset round that sets this list back to empty, as well as passes out cards
-table_list = []
 
 
 def compare_hands(player_hand_list):
@@ -73,10 +70,11 @@ def compare_hands(player_hand_list):
     return winners
 
 
-def get_hand_value(hand):
+def get_hand_value(hand, cards_on_table):
     """
     Gets the value of the current hand
     :param hand: the two cards that a particular player is holding.
+    :param cards_on_table: List of cards on the table.
     :return: a tuple with relative card info.
 
     TABLE FOR POSSIBLE RETURN VALUES:
@@ -96,7 +94,7 @@ def get_hand_value(hand):
     card_list.append(hand[0])
     card_list.append(hand[1])
 
-    for card in table_list:
+    for card in cards_on_table:
         card_list.append(card)
 
     count_array = generate_count_list(card_list)
@@ -187,6 +185,7 @@ def test_hand_func():
     :return:
     """
     test_deck = generate_deck()
+    table_list = []
 
     ctr = 0
 
@@ -208,7 +207,7 @@ def test_hand_func():
     for card in hand:
         print(card[0] + " of " + card[1])
 
-    hand_value = get_hand_value(hand)
+    hand_value = get_hand_value(hand, table_list)
 
     if hand_value[0] == 'two pair':
         print("Hand value: " + hand_value[0] + " of ranks " + hand_value[1] + " and " + hand_value[2])
@@ -224,6 +223,7 @@ def test_winner_func():
     :return:
     """
     test_deck = generate_deck()
+    table_list = []
 
     ctr = 0
     num = 0
@@ -273,7 +273,7 @@ def test_winner_func():
         print(card_one[0] + " of " + card_one[1] + " and ")
         print(card_two[0] + " of " + card_two[1] + "\n")
         hand_list = [hand[1], hand[2]]
-        hand_value = get_hand_value(hand_list)
+        hand_value = get_hand_value(hand_list, table_list)
 
         if hand_value[0] == 'two pair':
             prepped_tup = (hand[0], hand_value[0], hand_value[1], hand_value[2])
@@ -283,10 +283,17 @@ def test_winner_func():
         prepped_list.append(prepped_tup)
 
     winners = compare_hands(prepped_list)
-    winning_player = winners[0]
+    # winning_player = winners[0]
 
+    for player in winners:
+        print("Winner is player " + str(player[0]) + " with a " + player[1] +
+              " of rank " + player[2] + "! ")
+
+    """
     print("Winner is player " + str(winning_player[0]) + " with a " + winning_player[1] +
           " of rank " + winning_player[2] + "! ")
+    """
+    print("Size of winner list: " + str(len(winners)))
 
 
 def get_straight_flush_rank(card_array):
@@ -646,7 +653,7 @@ def has_royal_flush(card_list):
     :return:
     """
 
-    global suits
+    # global suits
 
     royal_flush = False
 
