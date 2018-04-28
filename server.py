@@ -1,6 +1,7 @@
 import socket
 import json
 
+from constants import initial_earnings
 from deck_util import generate_deck
 from deck_util import shuffle_deck
 from deck_util import remove_card_from_top
@@ -18,10 +19,27 @@ player_list = []
 # Format: [(Rank, Suit), (Rank, Suit), ...]
 table_card_list = []
 
+# Global information regarding how much money is on the table.
+pot = 0
+
 
 def unpack_cmd(data):
     global latest_command
     latest_command = json.loads(data)
+
+
+def initialize_player():
+    """
+    Initializes a player.
+    Updates the player list to handle this.
+    """
+
+    # TODO: Update so that players are initialized with more stuff.
+    new_player_id = len(player_list)
+
+    new_player = Player(new_player_id, initial_earnings, True)
+
+    player_list.append(new_player)
 
 
 def play_round():
