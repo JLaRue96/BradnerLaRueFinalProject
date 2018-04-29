@@ -19,7 +19,6 @@ class HoldEmServer:
         self.HOST = ''
         self.PORT = 8888
         self.num_players = 1
-        self.connections = {}
         self.addresses = {}
         self.sockets = {}
         self.conn = {}
@@ -90,6 +89,24 @@ class HoldEmServer:
     def pack_dict(self, dict):
         data = pickle.dumps(dict)
 
+    def send_message(self, message, player_num):
+        """
+        Sends a message to a particular player.
+        :param message: Message in string form.
+        :param player_num: ID of the player
+        """
+        self.collectCommand(message, [], player_num)
+
+    def send_message_all(self, message):
+        """
+        Sends a message to every client connected to server.
+        :param message: Message in string form.
+        """
+        for i in range(self.num_players):
+            self.collectCommand(message, [], i)
+
+        pass
+
     def play_round(self):
         """
         Plays a round of Hold'em.
@@ -112,6 +129,23 @@ class HoldEmServer:
             hand = [first_card, second_card]
 
             player.set_hand(hand)
+
+        cards_on_table = self.get_table_list_string()
+
+        # Tells players what cards are on the table.
+        self.send_message_all(cards_on_table)
+
+        # Sends information to the player about their current hands.
+        for i in range(self.num_players):
+            """
+            PSEUDO:
+            
+            -get player instance from i (pid)
+            -get hand from player
+            -formulate a string 
+            """
+
+        """
 
         # TODO: for each client, send from server to
         # client a string of each card name and rank.
@@ -169,7 +203,31 @@ class HoldEmServer:
 
         # TODO: Send to clients the list of winners.
 
+        # TODO: Distribute pot values winners.
+
         self.reset_player_statuses()
+        
+        """
+
+    def handle_betting(self):
+        """
+        players will now bet. During this time,
+        players have the opportunity to bet, fold, raise, or call.
+        """
+        pass
+
+    def get_table_list_string(self):
+        """
+        Creates a string of the list of cards on the table.
+        :return: String of table card list.
+        """
+        card_list_str = ''
+        card_list_str += '\nCARDS ON TABLE:\n'
+
+        for card in self.table_card_list:
+            card_list_str += card[0] + ' of ' + card[1] + '\n'
+
+        return card_list_str
 
     def reset_player_statuses(self):
         """
@@ -180,18 +238,26 @@ class HoldEmServer:
         for player in self.player_list:
             player.reset_is_playing_status()
 
-    def initialize_player(self):
+    def initialize_player(self, pid):
         """
         Initializes a player.
         Updates the player list to handle this.
+        :param pid: player_id
         """
 
-        # TODO: Update so that players are initialized with more stuff.
-        new_player_id = len(self.player_list)
-
-        new_player = Player(new_player_id, initial_earnings, True)
+        new_player = Player(pid, initial_earnings, True)
 
         self.player_list.append(new_player)
+
+    def get_player_from_id(self, pid):
+        """
+        Gets the player from a given player id
+        :param pid: player_id
+        :return: Player instance.
+        """
+        for player in self.player_list:
+            if player.get_id() == pid:
+                return player
 
 
 myServer = HoldEmServer()
