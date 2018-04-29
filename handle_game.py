@@ -771,15 +771,3 @@ def has_royal_flush(card_list):
 
     return royal_flush
 
-
-def main():
-    """
-    Main method. Primarily used for testing at this stage in development.
-    :return:
-    """
-
-    test_winner_func()
-
-
-if __name__ == '__main__':
-    main()
