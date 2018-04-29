@@ -1,7 +1,7 @@
 import socket
 import sys
 import time
-import cPickle as pickle
+import pickle
 import json
 from constants import initial_earnings
 from deck_util import generate_deck
