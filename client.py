@@ -1,29 +1,38 @@
 import socket
-
 import json
+import sys
+import time
+import pickle
 
-print("\nFill out the following fields:")
-HOST = input("\nNet Send Server Public IP: ")
-PORT = int(input("\nNet Send Server Port: "))
+clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-try:
-    s = socket(AF_INET,SOCK_STREAM)
-    s.connect((HOST,PORT))
-    print("Connected to server:",HOST,)
-except IOError:
-    print("\nUndefined Connection Error Encountered")
-    input("Press Enter to exit, then restart the script")
-    sys.exit()
+portOffset = input("enter player number: ") - 1;
 
-#dictionary that maps phases to command options
-commands = {"pre-flop" : ["check", "bet", "fold"], "round-1" : ["check", "bet", "fold"]}
+remote_ip = "127.0.0.1"
+port = 8888
 
-def send_cmd(command):
-    #serialize command (useful for once they get more complex)
-    try:
-        data_string = json.dumps(command)
-        s.send(data_string)
-        reply = s.recv(1024)
-    except IOError:
-        print("\nIO Error detected, exiting")
+clientSocket.connect((remote_ip , port + portOffset))
+print("clent connected to game server")
 
+newData = False
+
+while not newData:
+    dataIn = clientSocket.recv(4096)
+    if dataIn:
+        newData = True
+
+dictIn = pickle.loads(dataIn)
+
+numOptions = len(dictIn["options"])
+
+print("Select from the following options: ")
+for i in range(numOptions):
+    print(str(i) + ": " + dictIn["options"][i])
+
+selection = input("option number: ")
+
+returnDict = {"selection" : dictIn["options"][selection]}
+print("you chose " + returnDict["selection"])
+
+dataOut = pickledObj = pickle.dumps(returnDict, -1)
+clientSocket.sendall(dataOut)
