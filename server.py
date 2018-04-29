@@ -10,7 +10,7 @@ class HoldEmServer:
         self.client_list = []
         self.HOST = ''
         self.PORT = 8888
-        self.num_players = 2
+        self.num_players = 1
         self.connections = {}
         self.addresses = {}
         self.sockets = {}
@@ -39,9 +39,30 @@ class HoldEmServer:
 
     def collectCommand(self, stateMsg, options, playerNum):
         data = {"message" : stateMsg, "options" : options}
-        pickledObj = pickle.dumps(data, -1)
 
+        self.sendDict(data, playerNum)
+
+        dictIn = self.getResponse(playerNum)
+        
+        print("client selection: " + dictIn["selection"])
+
+        return dictIn
+
+    def getResponse(self, playerNum):
+        newData = False
+        while not newData:
+            dataIn = self.conn[playerNum].recv(4096)
+            if dataIn:
+                newData = True
+
+        dictIn = pickle.loads(dataIn)
+
+        return dictIn
+
+    def sendDict(self, dict, playerNum):
+        pickledObj = pickle.dumps(dict, -1)
         self.conn[playerNum].sendall(pickledObj)
+        return True
 
     def unpack_data(self, data):
         new_dict = pickle.loads(data)

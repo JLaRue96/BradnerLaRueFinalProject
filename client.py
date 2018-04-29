@@ -30,3 +30,9 @@ for i in range(numOptions):
     print(str(i) + ": " + dictIn["options"][i])
 
 selection = input("option number: ")
+
+returnDict = {"selection" : dictIn["options"][selection]}
+print("you chose " + returnDict["selection"])
+
+dataOut = pickledObj = pickle.dumps(returnDict, -1)
+clientSocket.sendall(dataOut)
