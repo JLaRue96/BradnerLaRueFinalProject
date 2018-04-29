@@ -61,7 +61,7 @@ playing = True
 while (playing):
     dictIn = recvDict(clientSocket)
 
-    if (recvDict["options"]):
+    if dictIn["options"]:
 
 
         returnDict = getOption(dictIn)
