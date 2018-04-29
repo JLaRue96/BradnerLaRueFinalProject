@@ -14,13 +14,19 @@ port = 8888
 clientSocket.connect((remote_ip , port + portOffset))
 print("clent connected to game server")
 
-testDict = {"cmd" : "bet", "value" : 25}
-print(testDict["cmd"])
+newData = False
 
-pickledObj = pickle.dumps(testDict)
+while not newData:
+    dataIn = clientSocket.recv(4096)
+    if dataIn:
+        newData = True
 
-clientSocket.sendall(pickledObj)
+dictIn = pickle.loads(dataIn)
 
-dictIn = pickle.loads(clientSocket.recv(4096))
+numOptions = len(dictIn["options"])
 
-print(dictIn["message"])
+print("Select from the following options: ")
+for i in range(numOptions):
+    print(str(i) + ": " + dictIn["options"][i])
+
+selection = input("option number: ")
