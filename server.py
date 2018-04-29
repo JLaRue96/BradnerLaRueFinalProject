@@ -54,6 +54,7 @@ class HoldEmServer:
             self.sockets[i].listen(1)
             self.conn[i], self.addr[i] = self.sockets[i].accept()
             print("connection " + str(i + 1) + " of " + str(self.num_players) + " established.")
+            self.initialize_player(i)
 
     def collectCommand(self, stateMsg, options, playerNum):
         data = {"message" : stateMsg, "options" : options}
@@ -128,11 +129,6 @@ class HoldEmServer:
 
             player.set_hand(hand)
 
-        cards_on_table = self.get_table_list_string()
-
-        # Tells players what cards are on the table.
-        self.send_message_all(cards_on_table)
-
         # Sends information to the player about their current hands.
         for i in range(self.num_players):
             """
@@ -140,10 +136,10 @@ class HoldEmServer:
             
             -get player instance from i (pid)
             -get hand from player
-            -formulate a string 
+            -formulate a string with player's cards
+            -send info to player with bet. 
             """
 
-        """
         # TODO: for each client, send from server to
         # client a string of each card name and rank.
 
@@ -157,6 +153,12 @@ class HoldEmServer:
             self.table_card_list.append(card)
             flop_ctr += 1
 
+        cards_on_table = self.get_table_list_string()
+
+        # Tells players what cards are on the table.
+        self.send_message_all(cards_on_table)
+
+        """
         # TODO: Send Clients list of cards. Should be printed to terminal.
         # TODO: Each Client bets. Clients can also fold if need be.
 
