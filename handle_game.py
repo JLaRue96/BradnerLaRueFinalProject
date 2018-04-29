@@ -3,9 +3,6 @@ Script used to handle gameplay.
 """
 
 from deck_util import generate_deck
-from deck_util import shuffle_deck
-from deck_util import remove_card_from_top
-from deck_util import add_cards_to_deck
 from constants import NUM_POSSIBLE_VALUES
 from constants import card_values_dict
 from constants import get_val_from_index
