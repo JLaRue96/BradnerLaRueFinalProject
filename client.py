@@ -25,7 +25,14 @@ def recvDict(clientSocket):
 
 def getOption(dictIn):
     """present options to user, have him selct among those"""
+
+    if not dictIn["options"]:
+        print(dictIn["message"])
+        return {}
+
     numOptions = len(dictIn["options"])
+
+    print(dictIn["message"])
 
     print("Select from the following options: ")
     for i in range(numOptions):
@@ -61,14 +68,13 @@ playing = True
 while (playing):
     dictIn = recvDict(clientSocket)
 
-    if dictIn["options"]:
+    returnDict = getOption(dictIn)
 
-
-        returnDict = getOption(dictIn)
+    if returnDict:
 
         if (returnDict["selection"] == "quit"):
             playing = False
         elif (returnDict["selection"] == "bet" or returnDict["selection"] == "raise"):
             returnDict["amount"] = getAmount()
 
-        sendDict(returnDict, clientSocket)
+    sendDict(returnDict, clientSocket)
