@@ -75,6 +75,7 @@ def play_round():
 
     # Play the flop cards.
     flop_ctr = 0
+    remove_card_from_top(deck)
     while flop_ctr < 3:
         card = remove_card_from_top(deck)
         table_card_list.append(card)
@@ -84,6 +85,7 @@ def play_round():
     # TODO: Each Client bets. Clients can also fold if need be.
 
     # Play the turn card.
+    remove_card_from_top(deck)
     turn_card = remove_card_from_top(deck)
     table_card_list.append(turn_card)
 
@@ -91,6 +93,7 @@ def play_round():
     # TODO: Each Client bets. Clients can also fold if need be.
 
     # Play the river card.
+    remove_card_from_top(deck)
     river_card = remove_card_from_top(deck)
     table_card_list.append(river_card)
 
@@ -108,9 +111,11 @@ def play_round():
             hand_value = get_hand_value(player.get_hand(), table_card_list)
 
             if hand_value[0] == 'Two pair':
-                player_tup = (player.get_id(), hand_value[0], hand_value[1], hand_value[2])
-            else:
+                player_tup = (player.get_id(), hand_value[0], hand_value[1], hand_value[2], hand_value[3])
+            elif hand_value[0] == 'nothing':
                 player_tup = (player.get_id(), hand_value[0], hand_value[1])
+            else:
+                player_tup = (player.get_id(), hand_value[0], hand_value[1], hand_value[2])
 
             player_info_tuple_list.append(player_tup)
 
