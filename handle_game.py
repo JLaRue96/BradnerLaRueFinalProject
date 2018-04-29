@@ -3,10 +3,6 @@ Script used to handle gameplay.
 """
 
 from deck_util import generate_deck
-from deck_util import shuffle_deck
-from deck_util import remove_card_from_top
-from deck_util import add_cards_to_deck
-from player import Player
 from constants import NUM_POSSIBLE_VALUES
 from constants import card_values_dict
 from constants import get_val_from_index
@@ -17,19 +13,21 @@ import random
 
 # Global variable for the list of cards on the table.
 # This will be filled out throughout the round.
-# TODO: Implement reset round that sets this list back to empty, as well as passes out cards
-table_list = []
 
 
 def compare_hands(player_hand_list):
     """
     Determines which player wins the round. May result in a tie.
-    Player hand input: (player_id, hand_value, highest_value_card).
+    Player hand input: (player_id, hand_value, highest rank of hand_value, highest rank of hand).
+    If hand = two pair, input = (player_id, hand_value, rank of pair one, rank of pair two, highest rank of hand)
+    If hand = nothing, input = (player_id, hand_value, highest rank in hand)
     In the case that the player's hand is a two pair, the input will be the following:
     (player_id, hand_value, highest_pair_rank, next_pair_rank)
     :param player_hand_list: List of remaining player's hands remaining in the round.
     :return: A list containing the winning player(s).
     It's a list so that, in the case of a tie, the pot can be split amongst the winners.
+
+    NOTE: This function assumes that at least one player is still in the game.
     """
     highest_valued_hand = player_hand_list[0]
 
@@ -47,48 +45,145 @@ def compare_hands(player_hand_list):
             highest_valued_hand = hand
 
         elif hand_value == curr_highest_val:
-            curr_high_card = highest_valued_hand[2]
-            hand_high_card = hand[2]
+            
+            if hand[1] == 'two pair':
+                highest_valued_hand = get_superior_two_pair_hand(highest_valued_hand, hand)
+            elif hand[1] == 'pair':
+                highest_valued_hand = get_superior_pair_hand(highest_valued_hand, hand)
+            elif hand[1] == 'nothing':
+                curr_high_card = card_values_dict[highest_valued_hand[2]]
+                hand_high_card = card_values_dict[hand[2]]
 
-            if hand_high_card > curr_high_card:
-                highest_valued_hand = hand
-            elif hand_high_card == curr_high_card and hand_value == 'two pair':
-                next_high_card = highest_valued_hand[3]
-                next_hand_high_card = hand[3]
-
-                if next_hand_high_card > next_high_card:
+                if hand_high_card > curr_high_card:
                     highest_valued_hand = hand
+            else:
+                highest_hand_rank = card_values_dict[highest_valued_hand[2]]
+                curr_hand_rank = card_values_dict[hand[2]]
+
+                if curr_hand_rank > highest_hand_rank:
+                    highest_valued_hand = hand
+
+                elif curr_hand_rank == highest_hand_rank:
+
+                    highest_high_card = card_values_dict[highest_valued_hand[3]]
+                    curr_hand_high_card = card_values_dict[hand[3]]
+
+                    if curr_hand_high_card > highest_high_card:
+                        highest_valued_hand = hand
+
+    # We now know what the superior hand is. That being said, we will scan through
+    # the player_hand list and
+    # find all of the players with this hand.
+    # NOTE: This function does NOT handle players who have folded. This will be covered
+    # on the server side of things.
 
     winners = []
 
     for hand in player_hand_list:
 
-        if hand[1] == highest_valued_hand[1] and hand[2] == highest_valued_hand[2]:
-            if highest_valued_hand[1] == 'two pair':
-                if hand[3] == highest_valued_hand[3]:
-                    winners.append(hand)
-            else:
+        if highest_valued_hand[1] == 'two pair':
+            if hand[1] == highest_valued_hand[1] and hand[2] == highest_valued_hand[2] and \
+                    hand[3] == highest_valued_hand[3] and hand[4] == highest_valued_hand[4]:
+                winners.append(hand)
+        elif highest_valued_hand[1] == 'nothing':
+            if hand[1] == highest_valued_hand[1] and hand[2] == highest_valued_hand[2]:
+                winners.append(hand)
+        else:
+            if hand[1] == highest_valued_hand[1] and hand[2] == highest_valued_hand[2] and \
+                    hand[3] == highest_valued_hand[3]:
                 winners.append(hand)
 
     return winners
 
 
-def get_hand_value(hand):
+def get_superior_two_pair_hand(player_tup_1, player_tup_2):
+    """
+    Based on player info, the superior two pair hand is returned.
+    :param player_tup_1: Info related to the hand of one player
+    :param player_tup_2: Info related to the hand of another player.
+    :return: The info related to the superior hand of a player.
+    """
+
+    p1_superior_pair_rank = card_values_dict[player_tup_1[2]]
+    p1_inferior_pair_rank = card_values_dict[player_tup_1[3]]
+    p1_high_card = card_values_dict[player_tup_1[4]]
+
+    p2_superior_pair_rank = card_values_dict[player_tup_2[2]]
+    p2_inferior_pair_rank = card_values_dict[player_tup_2[3]]
+    p2_high_card = card_values_dict[player_tup_2[4]]
+
+    if p1_superior_pair_rank != p2_superior_pair_rank:
+
+        if p1_superior_pair_rank > p2_superior_pair_rank:
+            return player_tup_1
+        else:
+            return player_tup_2
+
+    elif p1_inferior_pair_rank != p2_inferior_pair_rank:
+
+        if p1_inferior_pair_rank > p2_inferior_pair_rank:
+            return player_tup_1
+        else:
+            return player_tup_2
+
+    elif p1_high_card != p2_high_card:
+
+        if p1_high_card > p2_high_card:
+            return player_tup_1
+        else:
+            return player_tup_2
+
+    else:
+        # Both hands are equal, arbitrary tuple is returned.
+        return player_tup_1
+
+
+def get_superior_pair_hand(player_tup_1, player_tup_2):
+    """
+    Based on player info, the superior pair hand is returned.
+    :param player_tup_1: Info related to the hand of one player
+    :param player_tup_2: Info related to the hand of another player.
+    :return: The info related to the superior hand of a player.
+    """
+
+    p1_pair_rank = card_values_dict[player_tup_1[2]]
+    p1_high_card = card_values_dict[player_tup_1[3]]
+
+    p2_pair_rank = card_values_dict[player_tup_2[2]]
+    p2_high_card = card_values_dict[player_tup_2[3]]
+
+    if p1_pair_rank != p2_pair_rank:
+        if p1_pair_rank > p2_pair_rank:
+            return player_tup_1
+        else:
+            return player_tup_2
+    elif p1_high_card != p2_high_card:
+        if p1_high_card > p2_high_card:
+            return player_tup_1
+        else:
+            return player_tup_2
+    else:
+        # both hands are equal, arbitrary tuple is returned.
+        return player_tup_1
+
+
+def get_hand_value(hand, cards_on_table):
     """
     Gets the value of the current hand
     :param hand: the two cards that a particular player is holding.
+    :param cards_on_table: List of cards on the table.
     :return: a tuple with relative card info.
 
     TABLE FOR POSSIBLE RETURN VALUES:
-    Royal Flush: ('royal flush', 'Ace')
-    Straight Flush: ('straight flush', highest value in straight)
-    Four of a Kind: ('four of a kind', value of cards in 4ofK)
-    Full House: ('full house', value of cards in 3ofK portion of FH)
-    Flush: ('flush', high card in flush)
-    Straight: ('straight', high card in straight)
-    Three of a Kind: ('three of a kind', value of cards in 3ofK)
-    Two Pair: ('two pair', value of cards in first pair, value of cards in second pair)
-    Pair: ('pair', value of cards in pair)
+    Royal Flush: ('royal flush', 'Ace', highest rank in hand)
+    Straight Flush: ('straight flush', highest value in straight, highest rank in hand)
+    Four of a Kind: ('four of a kind', value of cards in 4ofK, highest rank in hand)
+    Full House: ('full house', value of cards in 3ofK portion of FH, highest rank in hand)
+    Flush: ('flush', high card in flush, highest rank in hand)
+    Straight: ('straight', high card in straight, highest rank in hand)
+    Three of a Kind: ('three of a kind', value of cards in 3ofK, highest rank in hand)
+    Two Pair: ('two pair', value of cards in first pair, value of cards in second pair, highest rank in hand)
+    Pair: ('pair', value of cards in pair, highest rank in hand)
     High Card: ('nothing', highest value in card list)
     """
 
@@ -96,46 +191,48 @@ def get_hand_value(hand):
     card_list.append(hand[0])
     card_list.append(hand[1])
 
-    for card in table_list:
+    for card in cards_on_table:
         card_list.append(card)
 
     count_array = generate_count_list(card_list)
 
+    high_card_rank = get_high_card(card_list)
+
     # Check if hand is royal flush
     if has_royal_flush(card_list):
-        hand_value = ('royal flush', 'Ace')
+        hand_value = ('royal flush', 'Ace', high_card_rank)
     # Check if hand is straight flush
     elif has_straight_flush(card_list):
         straight_flush_rank = get_straight_flush_rank(card_list)
-        hand_value = ('straight flush', straight_flush_rank)
+        hand_value = ('straight flush', straight_flush_rank, high_card_rank)
     # Check if hand is four of a kind
     elif has_n_of_same_rank(count_array, 4):
         four_of_kind_rank = get_rank_of_hand(count_array, 4)
-        hand_value = ('four of a kind', four_of_kind_rank)
+        hand_value = ('four of a kind', four_of_kind_rank, high_card_rank)
     # Check if hand is full house
     elif has_n_of_same_rank(count_array, 3) and has_n_of_same_rank(count_array, 2):
         full_house_rank = get_rank_of_hand(count_array, 3)
-        hand_value = ('full house', full_house_rank)
+        hand_value = ('full house', full_house_rank, high_card_rank)
     # Check if hand is flush
     elif has_flush(card_list):
         flush_rank = get_flush_rank(card_list)
-        hand_value = ('flush', flush_rank)
+        hand_value = ('flush', flush_rank, high_card_rank)
     # Check if hand is straight
     elif has_straight(count_array):
         straight_rank = get_straight_rank(count_array)
-        hand_value = ('straight', straight_rank)
+        hand_value = ('straight', straight_rank, high_card_rank)
     # Check if hand is three of a kind
     elif has_n_of_same_rank(count_array, 3):
         three_of_kind_rank = get_rank_of_hand(count_array, 3)
-        hand_value = ('three of a kind', three_of_kind_rank)
+        hand_value = ('three of a kind', three_of_kind_rank, high_card_rank)
     # Check if hand is a two pair
     elif has_two_pair(count_array):
         two_pair_ranks = get_two_pair(count_array)
-        hand_value = ('two pair', two_pair_ranks[0], two_pair_ranks[1])
+        hand_value = ('two pair', two_pair_ranks[0], two_pair_ranks[1], high_card_rank)
     # Check if hand is a pair
     elif has_n_of_same_rank(count_array, 2):
         pair_rank = get_rank_of_hand(count_array, 2)
-        hand_value = ('pair', pair_rank)
+        hand_value = ('pair', pair_rank, high_card_rank)
     else:
         high_val = get_high_card(card_list)
         hand_value = ('nothing', high_val)
@@ -187,6 +284,7 @@ def test_hand_func():
     :return:
     """
     test_deck = generate_deck()
+    table_list = []
 
     ctr = 0
 
@@ -208,7 +306,7 @@ def test_hand_func():
     for card in hand:
         print(card[0] + " of " + card[1])
 
-    hand_value = get_hand_value(hand)
+    hand_value = get_hand_value(hand, table_list)
 
     if hand_value[0] == 'two pair':
         print("Hand value: " + hand_value[0] + " of ranks " + hand_value[1] + " and " + hand_value[2])
@@ -224,6 +322,7 @@ def test_winner_func():
     :return:
     """
     test_deck = generate_deck()
+    table_list = []
 
     ctr = 0
     num = 0
@@ -238,7 +337,7 @@ def test_winner_func():
         ctr += 1
 
     # Generates the hands of 5 Players.
-    while num < 5:
+    while num < 2:
 
         cards = []
 
@@ -273,20 +372,28 @@ def test_winner_func():
         print(card_one[0] + " of " + card_one[1] + " and ")
         print(card_two[0] + " of " + card_two[1] + "\n")
         hand_list = [hand[1], hand[2]]
-        hand_value = get_hand_value(hand_list)
+        hand_value = get_hand_value(hand_list, table_list)
 
         if hand_value[0] == 'two pair':
-            prepped_tup = (hand[0], hand_value[0], hand_value[1], hand_value[2])
-        else:
+            prepped_tup = (hand[0], hand_value[0], hand_value[1], hand_value[2], hand_value[3])
+        elif hand_value[0] == 'nothing':
             prepped_tup = (hand[0], hand_value[0], hand_value[1])
+        else:
+            prepped_tup = (hand[0], hand_value[0], hand_value[1], hand_value[2])
 
         prepped_list.append(prepped_tup)
 
     winners = compare_hands(prepped_list)
-    winning_player = winners[0]
 
+    for player in winners:
+        print("Winner is player " + str(player[0]) + " with a " + player[1] +
+              " of rank " + player[2] + "! ")
+
+    """
     print("Winner is player " + str(winning_player[0]) + " with a " + winning_player[1] +
           " of rank " + winning_player[2] + "! ")
+    """
+    print("Size of winner list: " + str(len(winners)))
 
 
 def get_straight_flush_rank(card_array):
@@ -646,7 +753,7 @@ def has_royal_flush(card_list):
     :return:
     """
 
-    global suits
+    # global suits
 
     royal_flush = False
 

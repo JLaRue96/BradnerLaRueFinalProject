@@ -34,3 +34,6 @@ get_val_from_index = {
 
 # global list containing all possible card suits.
 suits = ['Diamonds', 'Hearts', 'Spades', 'Clubs']
+
+# Player initialization information.
+initial_earnings = 1000
