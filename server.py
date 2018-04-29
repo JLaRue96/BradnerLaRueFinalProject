@@ -138,6 +138,7 @@ class HoldEmServer:
             -get hand from player
             -formulate a string with player's cards
             -send info to player with bet. 
+            -formulate a string 
             """
 
         # TODO: for each client, send from server to
@@ -261,6 +262,12 @@ class HoldEmServer:
 myServer = HoldEmServer()
 myServer.acceptClients()
 # test sending of data here
+players_present = True
+
+while players_present:
+    myServer.collectCommand("Start a new round?", ["start", "quit"], 0)
+    myServer.play_round()
+
 myServer.collectCommand("test game state", ["bet", "fold"], 0)   
 time.sleep(5)
 myServer.shutDown()
