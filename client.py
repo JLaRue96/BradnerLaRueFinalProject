@@ -4,35 +4,71 @@ import sys
 import time
 import pickle
 
-clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+def setUpConnection(ip, port):
+    """establish a tcp connection to the game server"""
+    clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    clientSocket.connect((remote_ip , port))
+    print("client connected to game server")
+
+    return clientSocket
+
+def recvDict(clientSocket):
+    """wait for a dictionary to come from the server"""
+    newData = False
+    while not newData:
+        dataIn = clientSocket.recv(4096)
+        if dataIn:
+            newData = True
+
+    dictIn = pickle.loads(dataIn)
+    return dictIn
+
+def getOption(dictIn):
+    """present options to user, have him selct among those"""
+    numOptions = len(dictIn["options"])
+
+    print("Select from the following options: ")
+    for i in range(numOptions):
+        print(str(i) + ": " + dictIn["options"][i])
+
+    selectionNum = input("option number: ")
+    selection = dictIn["options"][selectionNum]
+
+    returnDict = {"selection" : selection}
+
+    print("you chose " + returnDict["selection"])
+
+    return returnDict
+
+def sendDict(returnDict, clientSocket):
+    """send a dictionary to the server"""
+    dataOut = pickle.dumps(returnDict, -1)
+    clientSocket.sendall(dataOut)
+
+def getAmount():
+    """Find out how much the user wants to bet"""
+    wager = input("enter wager amount: ")
+    return wager
 
 portOffset = input("enter player number: ") - 1;
-
+port = 8888 + portOffset;
 remote_ip = "127.0.0.1"
-port = 8888
 
-clientSocket.connect((remote_ip , port + portOffset))
-print("clent connected to game server")
+clientSocket = setUpConnection(remote_ip, port)
 
-newData = False
+playing = True
 
-while not newData:
-    dataIn = clientSocket.recv(4096)
-    if dataIn:
-        newData = True
+while (playing):
+    dictIn = recvDict(clientSocket)
 
-dictIn = pickle.loads(dataIn)
+    if (recvDict["options"]):
 
-numOptions = len(dictIn["options"])
 
-print("Select from the following options: ")
-for i in range(numOptions):
-    print(str(i) + ": " + dictIn["options"][i])
+        returnDict = getOption(dictIn)
 
-selection = input("option number: ")
+        if (returnDict["selection"] == "quit"):
+            playing = False
+        elif (returnDict["selection"] == "bet" or returnDict["selection"] == "raise"):
+            returnDict["amount"] = getAmount()
 
-returnDict = {"selection" : dictIn["options"][selection]}
-print("you chose " + returnDict["selection"])
-
-dataOut = pickledObj = pickle.dumps(returnDict, -1)
-clientSocket.sendall(dataOut)
+        sendDict(returnDict, clientSocket)
