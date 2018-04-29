@@ -1,7 +1,8 @@
 import socket
-import json
 import sys
 import time
+import cPickle as pickle
+import json
 
 class HoldEmServer:
 
@@ -9,40 +10,48 @@ class HoldEmServer:
         self.client_list = []
         self.HOST = ''
         self.PORT = 8888
-        self.num_players = 2
+        self.num_players = 3
         self.connections = {}
         self.addresses = {}
+        self.sockets = {}
+        self.conn = {}
+        self.addr = {}
 
         try:
-            self.serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            print("socket created")
+            for i in range(self.num_players):
+                self.sockets[i] = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                print("socket created")
+                self.sockets[i].bind((self.HOST, self.PORT + i))
         except socket.error:
             print('Failed to create socket. Error code: ' + str(msg[0]) + ' , Error message : ' + msg[1])
             sys.exit();
 
-        try:
-            self.serversocket.bind((self.HOST, self.PORT))
-        except socket.error:
-            print("bind failed")
+    def shutDown(self):
+        for i in range(self.num_players):
+            self.sockets[i].close()
 
     def acceptClients(self):
         #listen for 2 players
-        self.serversocket.listen(self.num_players)
-        print("socket listening for " + str(self.num_players) + " players to connect")
-        for i in range(2):
-            conn, addr = self.serversocket.accept()
+        for i in range(self.num_players):
+            self.sockets[i].listen(1)
+            self.conn[i], self.addr[i] = self.sockets[i].accept()
             print("connection " + str(i + 1) + " of " + str(self.num_players) + " established.")
 
-    def collectCommand(stateMsg, options, self):
+    def collectCommand(self, stateMsg, options):
         data = {"message" : stateMsg, "options" : options}
+        pickledObj = pickle.dumps(data, -1)
+        #self.serversocket.sendall(pickledObj)
 
-    def unpack_data(data, self):
-        new_dict = json.loads(data)
+    def unpack_data(self, data):
+        new_dict = pickle.loads(data)
         return new_dict
 
-    def pack_dict(dict, self):
-        data = json.dumps(dict)
+    def pack_dict(self, dict):
+        data = pickle.dumps(dict)
 
 myServer = HoldEmServer()
 myServer.acceptClients()
+#test sending of data here
+myServer.collectCommand("test game state", ["bet", "fold"])   
 time.sleep(5)
+myServer.shutDown()
