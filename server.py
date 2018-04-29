@@ -105,8 +105,6 @@ class HoldEmServer:
         for i in range(self.num_players):
             self.collectCommand(message, [], i)
 
-        pass
-
     def play_round(self):
         """
         Plays a round of Hold'em.
@@ -146,7 +144,6 @@ class HoldEmServer:
             """
 
         """
-
         # TODO: for each client, send from server to
         # client a string of each card name and rank.
 
@@ -202,7 +199,6 @@ class HoldEmServer:
         winners = compare_hands(player_info_tuple_list)
 
         # TODO: Send to clients the list of winners.
-
         # TODO: Distribute pot values winners.
 
         self.reset_player_statuses()
