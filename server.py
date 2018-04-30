@@ -13,6 +13,10 @@ from player import Player
 
 
 class HoldEmServer:
+    """
+    HoldEmServer class. Provides main functionality
+    of playing rounds of Texas Hold'Em
+    """
 
     def __init__(self):
         self.client_list = []
@@ -48,11 +52,20 @@ class HoldEmServer:
             sys.exit();
 
     def shutDown(self):
+        """
+        Closes out all sockets connected to this server.
+        :return: The server is now closed.
+        """
         for i in range(self.num_players):
             self.sockets[i].close()
 
     def acceptClients(self):
-        #listen for 2 players
+        """
+        This function waits for two clients to join
+        the server before sending out commands.
+        :return:
+        """
+        # listen for 2 players
         for i in range(self.num_players):
             self.sockets[i].listen(1)
             self.conn[i], self.addr[i] = self.sockets[i].accept()
@@ -60,6 +73,12 @@ class HoldEmServer:
             self.initialize_player(i)
 
     def collectCommand(self, stateMsg, options, playerNum):
+        """
+        :param stateMsg: Message to be sent to the player.
+        :param options: List of potential options for player to choose.
+        :param playerNum: ID of player who will receive this command prompt
+        :return: Response dictionary from the player.
+        """
         data = {"message" : stateMsg, "options" : options}
 
         self.sendDict(data, playerNum)
@@ -71,6 +90,11 @@ class HoldEmServer:
         return dictIn
 
     def getResponse(self, playerNum):
+        """
+        Receives a response from a given player
+        :param playerNum: Player to retreive response from
+        :return: Dictionary response from player.
+        """
         newData = False
         while not newData:
             dataIn = self.conn[playerNum].recv(4096)
@@ -82,15 +106,30 @@ class HoldEmServer:
         return dictIn
 
     def sendDict(self, dict, playerNum):
+        """
+        Sends a dictionary to the client associated with the playerNum
+        :param dict: dictionary to be sent
+        :param playerNum: id of player that dictionary will be sent to
+        :return: True
+        """
         pickledObj = pickle.dumps(dict, -1)
         self.conn[playerNum].sendall(pickledObj)
         return True
 
     def unpack_data(self, data):
+        """
+        Unpacks data received from client script
+        :param data: Data to be unpacked from client
+        :return: Dictionary from unpacked data
+        """
         new_dict = pickle.loads(data)
         return new_dict
 
     def pack_dict(self, dict):
+        """
+        Prepares a dictionary to be sent to a client
+        :param dict: Dictionary to be sent to client
+        """
         data = pickle.dumps(dict)
 
     def send_message(self, message, player_num):
@@ -355,6 +394,16 @@ class HoldEmServer:
                 return player
 
 
+"""
+'main' function of server script
+
+Instantiates a HoldEmServer object and accepts 2 clients.
+While there are players in the server, the option to start a new
+round is sent to the client that joined first.
+
+It then sends a dictionary of commands to the clients and waits for
+a returned dictionary. 
+"""
 myServer = HoldEmServer()
 myServer.acceptClients()
 # test sending of data here
